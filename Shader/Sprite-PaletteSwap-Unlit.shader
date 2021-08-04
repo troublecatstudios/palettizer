@@ -73,7 +73,6 @@ Shader "TroubleCat/Sprites/Palette-Swap-Unlit"
 
                 float4 frag(v2f IN) : SV_Target
                 {
-                    
                     // sample the main texture... pretty standard stuff
                     float4 mainTex = tex2D(_MainTex, IN.uv);
 
@@ -83,15 +82,15 @@ Shader "TroubleCat/Sprites/Palette-Swap-Unlit"
                     float4 mapTex = tex2D(_MapTex, IN.uv);
 
                     // scale up the RED (x) and GREEN (y) values from the color
-                    int x = floor(mapTex.x * 255);
-                    int y = floor(mapTex.y * 255);
+                    int x = round(mapTex.x * 255) / 8;
+                    int y = round(mapTex.y * 255) / 8;
+                    
+                    // convert the values to their respective index within the palette
+                    x -= 1;
+                    y -= 1;
 
-
-                    // convert the color values into texture space coords by
-                    // dividing by the WIDTH (z) of the palette texture. You'll
-                    // want to change this to use the width/height for
-                    // x, y if you are using a non-square palette size.
-                    float2 uv = float2(x * (1 / _PaletteTex_TexelSize.z) , y * (1 / _PaletteTex_TexelSize.z));
+                    // convert the color values into texture space coords
+                    float2 uv = float2(x * _PaletteTex_TexelSize.x, y * _PaletteTex_TexelSize.y);
 
                     // PaletteTex is a basic Texture2D you might
                     // want to change this to a [PerRendererData] 
@@ -115,7 +114,7 @@ Shader "TroubleCat/Sprites/Palette-Swap-Unlit"
                     // ShowMap is a [MaterialToggle] float
                     // if its set, then show the map data instead
                     if (ShowMap == 1.0) {
-                        c.rg = uv;
+                        c.rg = mapTex.xy;
                         c.b = 0;
                         return c;
                     }
